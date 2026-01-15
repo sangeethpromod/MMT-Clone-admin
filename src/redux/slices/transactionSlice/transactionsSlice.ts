@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { API_BASE_URL } from '../../../lib/axios';
 import { apiEndpoints } from '../../../config/apiEndpoints';
 import { Transaction, TransactionPagination, TransactionResponse } from '../../../types/transactions.types';
@@ -60,12 +60,17 @@ export const fetchTransactions = createAsyncThunk<
       const response = await axios.post(url, body);
       console.log('Transaction Response:', response.data);
       return response.data;
-    } catch (error: string) {
+    } catch (error: unknown) {
       console.error('Transaction API Error:', error);
-      console.error('Error Response:', error.response);
-      console.error('Error Status:', error.response?.status);
-      console.error('Error Data:', error.response?.data);
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch transactions');
+      if (error instanceof AxiosError) {
+        console.error('Error Response:', error.response);
+        console.error('Error Status:', error.response?.status);
+        console.error('Error Data:', error.response?.data);
+        return rejectWithValue(error.response?.data?.message || 'Failed to fetch transactions');
+      } else {
+        console.error('Unknown error occurred');
+        return rejectWithValue('Failed to fetch transactions');
+      }
     }
   }
 );
@@ -83,12 +88,17 @@ export const fetchTransactionDetails = createAsyncThunk<
       const response = await axios.get(url);
       console.log('Transaction Details Response:', response.data);
       return response.data;
-    } catch (error: string) {
+    } catch (error: unknown) {
       console.error('Transaction Details API Error:', error);
-      console.error('Error Response:', error.response);
-      console.error('Error Status:', error.response?.status);
-      console.error('Error Data:', error.response?.data);
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch transaction details');
+      if (error instanceof AxiosError) {
+        console.error('Error Response:', error.response);
+        console.error('Error Status:', error.response?.status);
+        console.error('Error Data:', error.response?.data);
+        return rejectWithValue(error.response?.data?.message || 'Failed to fetch transaction details');
+      } else {
+        console.error('Unknown error occurred');
+        return rejectWithValue('Failed to fetch transaction details');
+      }
     }
   }
 );
